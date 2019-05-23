@@ -4,7 +4,7 @@ const fs = require("fs");
 const dayjs = require("dayjs");
 
 // const START_TIME = "2019-05-20T19:00:00.000+10:00"; // WHEN ARTICLE WENT LIVE
-const START_TIME = "2019-05-20T20:00:00.000+10:00";
+const START_TIME = "2019-05-22T07:00:00.000+10:00";
 let initialTime = dayjs(START_TIME);
 
 const timeArray = Array(60);
@@ -52,7 +52,7 @@ let nextTime = initialTime;
 const main = async () => {
   for (const item of timeArray) {
     await processMinute(nextTime);
-    await sleep(5000);
+    await sleep(2000);
     nextTime = nextTime.add(1, "minute");
   }
 };
@@ -61,4 +61,5 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Actually start the process
 main();
