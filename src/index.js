@@ -5,10 +5,10 @@ const dayjs = require("dayjs");
 
 // const START_TIME = "2019-05-20T19:00:00.000+10:00"; // WHEN ARTICLE WENT LIVE
 //2019-05-21T00:00:00+10:00
-const START_TIME = "2019-05-21T01:00:00+10:00";
+const START_TIME = "2019-05-20T19:00:00.000+10:00";
 let initialTime = dayjs(START_TIME);
 
-const timeArray = Array(60 * 10);
+const timeArray = Array(60 * 16);
 
 // Accepts a dayjs time
 const processMinute = async minuteFrom => {
@@ -18,7 +18,7 @@ const processMinute = async minuteFrom => {
       auth: { username: "News", password: process.env.LOGGLY_PASSWORD },
       params: {
         q: "storyLabIncome",
-        size: 100,
+        size: 5000,
         from: minuteFrom.format(),
         until: minuteFrom.add(1, "minute").format()
       }

@@ -6,12 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phocks/loggly-export"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
     "dayjs": "^1.8.14",
     "dotenv": "^8.0.0",
+    "lodash": "^4.17.11",
     "require-all": "^3.0.0"
   }
 }

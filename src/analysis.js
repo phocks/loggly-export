@@ -1,26 +1,42 @@
 // Analyse logs
 const fs = require("fs");
+const dayjs = require("dayjs");
+const _ = require("lodash");
 
-let files = require("require-all")(__dirname + "/../output/01");
+let dirs = require("require-all")({
+  dirname: __dirname + "/../output/01",
+  recursive: true
+});
 
 let allEvents = [];
 
 // Loop over keys and push events to var
-for (let key in files) {
-  const currentFile = files[key];
+for (let key in dirs) {
+  const currentFile = dirs[key];
 
   // Exclude some files for testing purposes
   if (currentFile.total_events === 0) continue;
+  if (currentFile.total_events === undefined) continue;
   // if (currentFile.total_events > 30) continue;
 
   console.log("Found events: " + currentFile.total_events);
 
-  allEvents = [...allEvents, ...currentFile.events];
+  allEvents.push(...currentFile.events);
 }
 
+console.log(allEvents);
+
+const abcIds = allEvents.map(event => event.event.json.ABCGuestId);
+const uniqAbcIds = (uniq = [...new Set(abcIds)]);
+
+// console.log(uniqAbcIds);
+
 const newEvents = allEvents.map(event => {
+  const date = dayjs(event.timestamp);
+
   const universalObject = {
     timestamp: event.timestamp,
+    date: date.format(),
     ABCGuestId: event.event.json.ABCGuestId,
     clientHost: event.event.http.clientHost,
     country: event.event.json.ABC_LD.country,
@@ -37,36 +53,11 @@ const newEvents = allEvents.map(event => {
   return universalObject;
 });
 
-console.log(newEvents);
+const combinedPlays = uniqAbcIds.map(user => {
+  const filtered = newEvents.filter(event => event.ABCGuestId === user);
+  const merged = _.defaults({}, ...filtered);
+  return merged;
+});
 
-fs.writeFileSync("data.json", JSON.stringify(newEvents));
-
-const testEvent = {
-  raw:
-    '{"ABCGuestId":"23.62.157.42.226211553581157943","ABC_LD":{"country":"AU","state":"Qld"},"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0","host":"www.abc.net.au","logString":"incomeBracket","trackEvent_obj":{"category":"incomeBracket","action":6,"label":"storyLabIncome","value":6,"isMobile":false,"pathname":"/news/2019-05-21/income-scale-australia/9301378"}}',
-  logtypes: ["json"],
-  timestamp: 1558378961084,
-  unparsed: null,
-  logmsg:
-    '{"ABCGuestId":"23.62.157.42.226211553581157943","ABC_LD":{"country":"AU","state":"Qld"},"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0","host":"www.abc.net.au","logString":"incomeBracket","trackEvent_obj":{"category":"incomeBracket","action":6,"label":"storyLabIncome","value":6,"isMobile":false,"pathname":"/news/2019-05-21/income-scale-australia/9301378"}}',
-  id: "d7838fd3-7b31-11e9-801a-0234fe2ede76",
-  tags: ["trackEvent"],
-  event: {
-    json: {
-      logString: "incomeBracket",
-      ABC_LD: { country: "AU", state: "Qld" },
-      host: "www.abc.net.au",
-      ABCGuestId: "23.62.157.42.226211553581157943",
-      trackEvent_obj: {
-        category: "incomeBracket",
-        value: 6,
-        label: "storyLabIncome",
-        pathname: "/news/2019-05-21/income-scale-australia/9301378",
-        action: 6,
-        isMobile: false
-      },
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0"
-    },
-    http: { clientHost: "58.6.208.170" }
-  }
-};
+// Write the data
+fs.writeFileSync("data.json", JSON.stringify(combinedPlays));
