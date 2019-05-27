@@ -7,6 +7,7 @@ let dirs = require("require-all")({
   dirname: __dirname + "/../output/01",
   recursive: true
 });
+console.log("Loaded log files...");
 
 let allEvents = [];
 
@@ -23,13 +24,11 @@ for (let key in dirs) {
 
   allEvents.push(...currentFile.events);
 }
-
-console.log(allEvents);
+console.log(`Found ${allEvents.length} total events...`);
 
 const abcIds = allEvents.map(event => event.event.json.ABCGuestId);
 const uniqAbcIds = (uniq = [...new Set(abcIds)]);
-
-// console.log(uniqAbcIds);
+console.log(`Found ${uniqAbcIds.length} unique ABC Ids`);
 
 const newEvents = allEvents.map(event => {
   const date = dayjs(event.timestamp);
@@ -52,12 +51,15 @@ const newEvents = allEvents.map(event => {
 
   return universalObject;
 });
+console.log(`Data extracted from ${newEvents.length} events...`);
 
 const combinedPlays = uniqAbcIds.map(user => {
   const filtered = newEvents.filter(event => event.ABCGuestId === user);
   const merged = _.defaults({}, ...filtered);
   return merged;
 });
+console.log(`Merged data into ${combinedPlays.length} unique ABC Ids...`);
 
 // Write the data
-fs.writeFileSync("data.json", JSON.stringify(combinedPlays));
+fs.writeFileSync("output/data.json", JSON.stringify(combinedPlays));
+console.log(`Data file written...`);
