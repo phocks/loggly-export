@@ -3,8 +3,12 @@ const fs = require("fs");
 const dayjs = require("dayjs");
 const _ = require("lodash");
 
+const _cliProgress = require('cli-progress');
+// create a new progress bar instance and use shades_classic theme
+const bar1 = new _cliProgress.Bar({}, _cliProgress.Presets.shades_classic);
+
 let dirs = require("require-all")({
-  dirname: __dirname + "/../output/01",
+  dirname: __dirname + "/../output/02",
   recursive: true
 });
 console.log("Loaded log files...");
@@ -20,7 +24,7 @@ for (let key in dirs) {
   if (currentFile.total_events === undefined) continue;
   // if (currentFile.total_events > 30) continue;
 
-  console.log("Found events: " + currentFile.total_events);
+  // console.log("Found events: " + currentFile.total_events);
 
   allEvents.push(...currentFile.events);
 }
@@ -53,11 +57,17 @@ const newEvents = allEvents.map(event => {
 });
 console.log(`Data extracted from ${newEvents.length} events...`);
 
-const combinedPlays = uniqAbcIds.map(user => {
+console.log("Now merging data...")
+bar1.start(uniqAbcIds.length, 0);
+
+const combinedPlays = uniqAbcIds.map((user, index) => {
   const filtered = newEvents.filter(event => event.ABCGuestId === user);
   const merged = _.defaults({}, ...filtered);
+  bar1.update(index);
   return merged;
 });
+bar1.stop();
+
 console.log(`Merged data into ${combinedPlays.length} unique ABC Ids...`);
 
 // Write the data
