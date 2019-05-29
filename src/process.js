@@ -1,3 +1,5 @@
+const _ = require("lodash")
+
 const data = require("../output/merged/combined-income-comparisons-responses.json");
 
 console.log("Number of unique responses: " + data.length);
@@ -102,14 +104,50 @@ console.log("People's actual bracket 1: " + counts[1]);
 const onMobile = data.filter(d => {
   if (d.isMobile === true) return true;
   return false;
-})
+});
 
 const notOnMobile = data.filter(d => {
   if (d.isMobile === false) return true;
   return false;
-})
+});
 
 console.log("---");
-console.log("People on mobile: " + onMobile.length)
-console.log("People not on mobile: " + notOnMobile.length)
-console.log(`Percent on mobile: ${onMobile.length / (onMobile.length + notOnMobile.length) * 100}`)
+console.log("People on mobile: " + onMobile.length);
+console.log("People not on mobile: " + notOnMobile.length);
+console.log(
+  `Percent on mobile: ${(onMobile.length / (onMobile.length + notOnMobile.length)) * 100}`
+);
+console.log("---");
+
+// Work out where people are
+const geoData = data
+  .map(d => {
+    return d.lgaDropdown;
+  })
+  .filter(d => {
+    if (typeof d === "undefined") return false;
+    return true;
+  });
+
+counts = {};
+
+for (var i = 0; i < geoData.length; i++) {
+  var num = geoData[i];
+  counts[num] = counts[num] ? counts[num] + 1 : 1;
+}
+
+
+const countArray = Object.keys(counts).map(function(key,index) {
+  return {
+    lgaDropdown: key,
+    count: counts[key]
+  }
+});
+
+
+const sortedGeoData = _.sortBy(countArray, "count")
+
+console.log("lgaDropdown,count")
+sortedGeoData.reverse().forEach(lga => {
+  console.log(lga.lgaDropdown + ",", lga.count)
+}) 
